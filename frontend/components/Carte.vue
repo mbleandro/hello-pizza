@@ -14,20 +14,29 @@
         <v-btn
           color="warning"
           dark
-          @click="add_to_cart(item)"
+          @click="open_confirm_modal($event, item)"
         >
           Adicionar ao carrinho
         </v-btn>
       </v-list-tile>
     </template>
+    <confirm-modal :product="selected_product" ref="confirm_modal"/>
   </v-list>
 </template>
 
 <script>
+
+  import confirmModal from '~/components/confirm-modal.vue'
+  
   export default {
+    components: {
+      confirmModal
+    },
     props: ['items'],
     data () {
-      return {}
+      return {
+        selected_product: null
+      }
     },
     methods: {
       // add_to_cart(item){
@@ -53,7 +62,12 @@
             }
             }
         )
-      }
+      },
+      open_confirm_modal (evt, item) {
+        this.selected_product = item
+        this.$refs.confirm_modal.open();
+        evt.stopPropagation();
+      },
     },
     mounted() {
       if (this.pedido.length == 0) {
