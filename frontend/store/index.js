@@ -34,6 +34,10 @@ const store = () => new Vuex.Store({
         total += element.price
       });
       state.total_price = total
+    },
+    CLEAR_PEDIDO(state) {
+      state.pedido = []
+      state.total_price = 0
     }
   },
   getters: {

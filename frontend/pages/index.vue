@@ -16,6 +16,9 @@ export default {
             result.data.data.forEach(element => {
               element.photo = "media/" + element.photo
               element.price = parseFloat(element.price)
+              element['half'] = false
+              element['half_price'] = element.price / 2
+              element['obs'] = ''
             });
             return {
                 items: result.data.data

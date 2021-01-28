@@ -1,25 +1,33 @@
 <template>
   <div class="flex">
     <div>
-      <v-list two-line class="list">
+      <div class="list">
         <template class="flex" v-for="item in pedido">
-          <v-list-tile :key="item.title" avatar>
+          <v-list-tile :key="item.title" avatar class="item-content">
             <v-list-tile-avatar>
-              <img :src="item.photo" />
+              <img v-if="!item.half" :src="item.photo">
+              <img v-if="item.half" src="../assets/images/default.img.png">
             </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title>{{ item.name }}</v-list-tile-title>
-              <v-list-tile-sub-title>{{
-                item.description
-              }}</v-list-tile-sub-title>
-              <label>R$ {{ item.price }}</label>
+            <v-list-tile-content class="item-content" v-if="!item.half">
+              <v-list-tile-title>{{item.name}}</v-list-tile-title>
+              <v-list-tile-sub-title>{{item.description}}</v-list-tile-sub-title>
+              <v-list-tile-sub-title>{{item.obs}}</v-list-tile-sub-title>
+              <label>R$ {{item.price | priceBR}}</label>
+            </v-list-tile-content>
+            <v-list-tile-content class="item-content" v-if="item.half">
+              <v-list-tile-title style="font-size: 15px;">1: {{item[0].name}} / 2: {{item[1].name}}</v-list-tile-title>
+              <v-list-tile-sub-title>{{item[0].description}}</v-list-tile-sub-title>
+              <v-list-tile-sub-title>{{item[1].description}}</v-list-tile-sub-title>
+              <v-list-tile-sub-title>1: {{item[0].obs}}</v-list-tile-sub-title>
+              <v-list-tile-sub-title>2: {{item[1].obs}}</v-list-tile-sub-title>
+              <label>R$ {{item.price | priceBR}}</label>
             </v-list-tile-content>
             <v-btn color="error" dark @click="remove(item)">
               Remover do Carrinho
             </v-btn>
           </v-list-tile>
         </template>
-      </v-list>
+      </div>
     </div>
     <p class="total-price">Valor do Pedido: R$ {{ total_price }}</p>
 
@@ -133,12 +141,26 @@ export default {
       ) {
         this.text += `Bom dia/ Boa tarde / Boa Noite \n`;
         this.pedido.forEach((item) => {
-          this.text += `*- ${item.name}* \n`;
-          this.text += ` --- ${item.description} \n`;
-          this.text += ` ---------------- R$${item.price
-            .toFixed(2)
-            .replace(".", ",")} \n \n`;
-        });
+          if (item.half) {
+            this.text += `*- 1: Meia ${item[0].name} / 2: Meia ${item[1].name}*`
+            this.text += ` --- 1: ${item[0].description} \n`;
+            this.text += ` --- 2: ${item[1].description} \n`;
+            this.text += ` ---------------- R$${item.price.toFixed(2).replace(".", ",")} \n `;
+            if (item[0].obs) {
+              this.text += `1: obs: ${item[0].obs} \n \n`
+            }
+            if (item[1].obs) {
+              this.text += `2: obs: ${item[1].obs} \n \n`
+            }
+          } else {
+            this.text += `*- ${item.name}* \n`;
+            this.text += ` --- ${item.description} \n`;
+            this.text += ` ---------------- R$${item.price.toFixed(2).replace(".", ",")} \n `;
+            if (item.obs) {
+              this.text += `obs: ${item.obs} \n \n`
+            }
+          }
+        })
         this.text += `---- Total: R$${this.total_price} ---- \n \n`;
         this.text += `*Entregar para ${this.$v.name.$model} no endereço:*`;
         this.text += `-- ${this.$v.street.$model}, num. ${this.$v.number.$model} \n --- ${this.$v.district.$model}, ${this.$v.city.$model}`;
@@ -211,18 +233,19 @@ export default {
 };
 </script>
 
-<style>
+<style >
 .flex {
   display: flex;
   width: 100%;
   flex-direction: column;
-  flex-wrap: wrap;
 }
 
 .list {
   width: 100%;
-  height: auto !important;
   justify-content: space-around;
+  display: flex;
+  flex-direction: column;
+  height: auto;
 }
 
 .total-price {
@@ -230,4 +253,9 @@ export default {
   margin-right: 35px;
   font-weight: bold;
 }
+
+.item-content {
+  height: 150px;
+}
+
 </style>

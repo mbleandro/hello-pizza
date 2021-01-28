@@ -27,11 +27,18 @@
               avatar
             >
             <v-list-tile-avatar>
-              <img :src="item.photo">
+              <img v-if="!item.half" :src="item.photo">
+              <img v-if="item.half" src="../assets/images/default.img.png">
             </v-list-tile-avatar>
-            <v-list-tile-content>
+            <v-list-tile-content v-if="!item.half">
               <v-list-tile-title>{{item.name}}</v-list-tile-title>
-              <v-list-tile-sub-title>{{item.description}}</v-list-tile-sub-title>
+              <v-list-tile-sub-title>{{item.obs}}</v-list-tile-sub-title>
+              <label>R$ {{item.price | priceBR}}</label>
+            </v-list-tile-content>
+            <v-list-tile-content v-if="item.half">
+              <v-list-tile-title style="font-size: 15px;">1:{{item[0].name}} / 2:{{item[1].name}}</v-list-tile-title>
+              <v-list-tile-sub-title v-if="item[0].obs">1: {{item[0].obs}}</v-list-tile-sub-title>
+              <v-list-tile-sub-title v-if="item[1].obs">2: {{item[1].obs}}</v-list-tile-sub-title>
               <label>R$ {{item.price | priceBR}}</label>
             </v-list-tile-content>
             <v-btn
