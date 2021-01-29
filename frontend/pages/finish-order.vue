@@ -1,7 +1,7 @@
 <template>
   <div class="flex">
     <div>
-      <div class="list">
+      <div class="list-finish">
         <template class="flex" v-for="item in pedido">
           <v-list-tile :key="item.title" avatar class="item-content">
             <v-list-tile-avatar>
@@ -12,15 +12,15 @@
               <v-list-tile-title>{{item.name}}</v-list-tile-title>
               <v-list-tile-sub-title>{{item.description}}</v-list-tile-sub-title>
               <v-list-tile-sub-title>{{item.obs}}</v-list-tile-sub-title>
-              <label>R$ {{item.price | priceBR}}</label>
+              <label>R$ {{item.price | priceBR}}<label v-if="item.stuffed"> (Borda Recheada)</label></label>
             </v-list-tile-content>
             <v-list-tile-content class="item-content" v-if="item.half">
               <v-list-tile-title style="font-size: 15px;">1: {{item[0].name}} / 2: {{item[1].name}}</v-list-tile-title>
               <v-list-tile-sub-title>{{item[0].description}}</v-list-tile-sub-title>
               <v-list-tile-sub-title>{{item[1].description}}</v-list-tile-sub-title>
-              <v-list-tile-sub-title>1: {{item[0].obs}}</v-list-tile-sub-title>
-              <v-list-tile-sub-title>2: {{item[1].obs}}</v-list-tile-sub-title>
-              <label>R$ {{item.price | priceBR}}</label>
+              <v-list-tile-sub-title v-if="item[0].obs">1: {{item[0].obs}}</v-list-tile-sub-title>
+              <v-list-tile-sub-title v-if="item[1].obs">2: {{item[1].obs}}</v-list-tile-sub-title>
+              <label>R$ {{item.price | priceBR}}<label v-if="item.stuffed"> (Borda Recheada)</label></label>
             </v-list-tile-content>
             <v-btn color="error" dark @click="remove(item)">
               Remover do Carrinho
@@ -90,7 +90,6 @@
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
 export default {
-  layout: "complex",
   mixins: [validationMixin],
   data() {
     return {
@@ -197,6 +196,10 @@ export default {
     total_price: function () {
       return this.$store.getters.total_price.toFixed(2).replace(".", ",");
     },
+    config: function () {
+      let _config = this.$store.getters.config;
+      return this.$store.getters.config;
+    },
     errorsDistrict() {
       const errors = [];
       if (!this.$v.district.$dirty) return errors;
@@ -240,7 +243,7 @@ export default {
   flex-direction: column;
 }
 
-.list {
+.list-finish {
   width: 100%;
   justify-content: space-around;
   display: flex;
@@ -255,7 +258,7 @@ export default {
 }
 
 .item-content {
-  height: 150px;
+  height: 110px;
 }
 
 </style>

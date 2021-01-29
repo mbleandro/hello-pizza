@@ -6,7 +6,8 @@ const store = () => new Vuex.Store({
     logged_user: undefined,
     pedido: [],
     total_price: 0,
-    snack: {}
+    snack: {},
+    config: {},
   },
   mutations: {
     SET_LOGGED_USER(state, logged_user) {
@@ -38,6 +39,9 @@ const store = () => new Vuex.Store({
     CLEAR_PEDIDO(state) {
       state.pedido = []
       state.total_price = 0
+    },
+    SET_CONFIG(state, _config) {
+      state.config = _config
     }
   },
   getters: {
@@ -52,6 +56,9 @@ const store = () => new Vuex.Store({
     },
     total_price (state) {
       return state.total_price
+    },
+    config (state) {
+      return state.config
     }
   }
 })

@@ -7,8 +7,15 @@
             <div class="product-info">
                 <div class="informations">
                   <p><label class="product-name">{{product.name}}</label></p>
-                  <p class="product-description"><label>{{product.description}}</label></p>
-                  <p><label class="product-price">R$ {{product.price | priceBR }}</label></p>
+                  <p><label>{{product.description}}</label></p>
+                  <p><label class="product-price">R$ {{product.price | priceBR }}<label v-if="stuffed"> + R${{config.borda_price_str}}</label></label>
+                    <v-checkbox
+                      v-model="stuffed"
+                      :label="`Borda Recheada + R$${config.borda_price_str}`"
+                      color="success"
+                      hide-details
+                    ></v-checkbox>
+                  </p>
                 </div>
                 <!-- <v-btn fab dark class="add-remove-btn" color="error">
                     <v-icon dark>remove</v-icon>
@@ -52,6 +59,7 @@ export default {
       loading: false,
       obs: '',
       quant: 1,
+      stuffed: false,
     };
   },
   computed: {
@@ -61,6 +69,10 @@ export default {
     total_price: function () {
       return this.$store.getters.total_price.toFixed(2).replace(".", ",");
     },
+    config: function () {
+      let _config = this.$store.getters.config;
+      return this.$store.getters.config;
+    }
   },
   methods: {
     open() {
@@ -71,20 +83,29 @@ export default {
       this.visible = false;
       this.quant = 1
       this.product.obs = ''
+      this.stuffed = false
       console.log("Close");
     },
     add() {
+      let _price = 0
+      if (this.stuffed) {
+        _price = this.product.price + this.config.borda_price
+      } else {
+        _price = this.product.price
+      }
       this.$store.commit("ADD_TO_ORDER", {
         half: false,
         name: this.product.name,
-        price: this.product.price,
+        price: _price,
         photo: this.product.photo,
         description: this.product.description,
-        obs: this.product.obs
+        obs: this.product.obs,
+        stuffed: this.stuffed
       });
       this.$cookies.set("pedido", JSON.stringify(this.pedido));
       this.quant = 1
       this.product.obs = ''
+      this.stuffed = false
       this.visible = false;
     },
   },

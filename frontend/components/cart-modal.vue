@@ -33,13 +33,13 @@
             <v-list-tile-content v-if="!item.half">
               <v-list-tile-title>{{item.name}}</v-list-tile-title>
               <v-list-tile-sub-title>{{item.obs}}</v-list-tile-sub-title>
-              <label>R$ {{item.price | priceBR}}</label>
+              <label>R$ {{item.price | priceBR}}<label v-if="item.stuffed"> (Borda Recheada)</label></label>
             </v-list-tile-content>
             <v-list-tile-content v-if="item.half">
               <v-list-tile-title style="font-size: 15px;">1:{{item[0].name}} / 2:{{item[1].name}}</v-list-tile-title>
               <v-list-tile-sub-title v-if="item[0].obs">1: {{item[0].obs}}</v-list-tile-sub-title>
               <v-list-tile-sub-title v-if="item[1].obs">2: {{item[1].obs}}</v-list-tile-sub-title>
-              <label>R$ {{item.price | priceBR}}</label>
+              <label>R$ {{item.price | priceBR}}<label v-if="item.stuffed"> (Borda Recheada)</label></label>
             </v-list-tile-content>
             <v-btn
               color="error"
@@ -54,7 +54,7 @@
       <div class="modal-footer">
         <v-btn class="blue--text darken-1 cancel-button" flat @click="close()">Cancel</v-btn>
         <label class="price">R$ {{total_price}}</label>
-        <v-btn style="justify-content: flex-end" color="success" :to="{name: 'finish-order'}">FINALIZAR COMPRA</v-btn>
+        <v-btn style="justify-content: flex-end" color="success" :to="{name: 'finish-order'}" @click="close()">FINALIZAR COMPRA</v-btn>
       </div>
     </v-card>
   </v-dialog>
@@ -93,6 +93,10 @@
       },
       total_price: function() {
         return this.$store.getters.total_price.toFixed(2).replace('.',',')
+      },
+      config: function () {
+        let _config = this.$store.getters.config;
+        return this.$store.getters.config;
       }
     }
   }

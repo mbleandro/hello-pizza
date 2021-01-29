@@ -7,3 +7,4 @@ htmlcov/
 .idea
 /hello-pizza.log
 /media
+.vscode

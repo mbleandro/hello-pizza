@@ -13,14 +13,11 @@ const api = {
     whoami(){
         return get('/api/whoami');
     },
-    add_todo(newtask){
-        return post('/api/add_todo', {new_task: newtask});
-    },
-    list_todos(){
-        return get('/api/list_todos');
-    },
     list_products(){
         return get('/api/list_products');
+    },
+    get_config(){
+        return get('/api/getconfig')
     }
 }
 export default api;

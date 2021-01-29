@@ -24,6 +24,7 @@
 <script>
   import toolbar from '~/components/toolbar.vue'
   import footer from '~/components/footer.vue'
+  import AppApi from '~apijs'
   export default {
     components: {
       toolbar,
@@ -33,7 +34,19 @@
       layout: {
         drawer: true,
       },
+      config: {}
     }),
+    mounted () {
+      AppApi.get_config().then(result => {
+        this.config = result.data
+        this.config.frete = parseFloat(this.config.frete)
+        this.config.borda_price = parseFloat(this.config.borda_price)
+        this.config['frete_str'] = this.config.frete.toFixed(2).replace(".", ",")
+        this.config['borda_price_str'] = this.config.borda_price.toFixed(2).replace(".", ",")
+        this.$store.commit('SET_CONFIG', this.config)
+        console.log("config: ", this.config)
+      })
+    },
     computed: {
       snack () {
         return this.$store.getters.snack

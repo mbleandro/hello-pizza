@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from solo.models import SingletonModel
 
 class ActivityLog(models.Model):
     type = models.CharField(max_length=64)
@@ -23,3 +24,25 @@ class Product(models.Model):
     name = models.CharField(max_length=64)
     description = models.CharField(max_length=200)
     price = models.DecimalField(max_digits=6, decimal_places=2)
+
+class Config(SingletonModel):
+    site_name = models.CharField(max_length=255, default='Hello Pizza')
+    frete = models.DecimalField(max_digits=5, decimal_places=2, default=5.00)
+    borda_price = models.DecimalField(max_digits=5, decimal_places=2, default=2.00)
+    year = models.IntegerField(default=2021)
+    maintenance_mode = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "Configuration"
+
+    class Meta:
+        verbose_name = "Configuration"
+
+    def _to_dict(self):
+        return {
+            'site_name': self.site_name,
+            'frete': self.frete,
+            'borda_price': self.borda_price,
+            'year': self.year,
+            'maintenance_mode': self.maintenance_mode
+        }

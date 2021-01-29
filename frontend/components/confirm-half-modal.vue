@@ -29,7 +29,14 @@
                 ></v-textarea>
         </v-container>
       </v-card-text>
-      <label class="price">Preço da Pizza: R$ {{sumPrice | priceBR}}</label>
+      <v-checkbox
+        class="stuffed"
+        v-model="stuffed"
+        :label="`Borda Recheada + R$${config.borda_price_str}`"
+        color="success"
+        hide-details
+      ></v-checkbox>
+      <label class="price">Preço da Pizza: R$ {{sumPrice | priceBR}}<label v-if="stuffed"> + R${{config.borda_price_str}}</label></label>
       <div class="flex-btns">
         <v-btn class="blue--text darken-1" flat @click="close()">Cancel</v-btn>
         <v-btn
@@ -53,6 +60,7 @@ export default {
       loading: false,
       obs: '',
       quant: 1,
+      stuffed: false
     };
   },
   computed: {
@@ -61,6 +69,10 @@ export default {
     },
     total_price: function () {
       return this.$store.getters.total_price.toFixed(2).replace(".", ",");
+    },
+    config: function () {
+      let _config = this.$store.getters.config;
+      return this.$store.getters.config;
     },
   },
   methods: {
@@ -76,9 +88,16 @@ export default {
       console.log("Close");
     },
     add() {
+      let _price = 0
+      if (this.stuffed) {
+        _price = this.sumPrice + this.config.borda_price
+      } else {
+        _price = this.sumPrice
+      }
       this.$store.commit("ADD_TO_ORDER", {
         half: true,
-        price: this.sumPrice,
+        price: _price,
+        stuffed: this.stuffed,
         0: {
           name: this.products[0].name,
           price: this.products[0].price,
@@ -156,6 +175,12 @@ export default {
   display: flex;
   flex-direction: row;
   min-height: 148px;
+}
+
+.stuffed {
+  display: flex;
+  justify-content: center;
+  margin-top: 0;
 }
 
 .price {

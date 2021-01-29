@@ -8,4 +8,5 @@ urlpatterns = [
     url(r'^api/whoami$', views.whoami),
 
     url(r'^api/list_products$', views.list_products),
+    url(r'^api/getconfig', views.get_config),
 ]

@@ -6,7 +6,7 @@ from commons.django_model_utils import get_or_none
 from commons.django_views_utils import ajax_login_required
 from core.service import log_svc, products_svc
 from django.views.decorators.csrf import csrf_exempt
-
+from .models import Config
 
 def dapau(request):
     raise Exception('break on purpose')
@@ -47,18 +47,6 @@ def whoami(request):
     return JsonResponse(i_am)
 
 
-@ajax_login_required
-def add_todo(request):
-    todo = todo_svc.add_todo(request.POST['new_task'])
-    return JsonResponse(todo)
-
-
-@ajax_login_required
-def list_todos(request):
-    todos = todo_svc.list_todos()
-    return JsonResponse({'todos': todos})
-
-
 def _user2dict(user):
     d = {
         'id': user.id,
@@ -73,3 +61,8 @@ def _user2dict(user):
         }
     }
     return d
+
+def get_config(request):
+    config = Config.objects.get()
+    return JsonResponse(config._to_dict())
+
