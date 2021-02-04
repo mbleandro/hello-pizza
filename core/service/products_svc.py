@@ -1,4 +1,4 @@
-from core.models import Product
+from core.models import Product, Edge
 
 def list_products():
     products = list(Product.objects.all().values())
@@ -19,3 +19,7 @@ def list_products():
     #         'price': 30.20
     #     },
     # ]
+
+def list_edges():
+    edges = list(Edge.objects.all().values())
+    return edges

@@ -1,42 +1,21 @@
 <template>
   <v-dialog v-model="visible" max-width="500px" persistent>
     <v-card>
-      <v-card-title class="card-title">Deseja adicionar o produto ao pedido?</v-card-title>
-      <v-card-text>
-        <v-container class="flex" fluid v-for="(product) in products" :key=product.id>
-            <div class="product-info">
-              <div class="informations">
-                <p><label class="product-name">Meia {{product.name}}</label></p>
-                <p><label class="product-description">{{product.description}}</label></p>
-                <p><label class="product-price">R$ {{product.half_price | priceBR }}</label></p>
-              </div>
-                <!--<v-btn fab dark class="add-remove-btn" color="error">
-                    <v-icon dark>remove</v-icon>
-                </v-btn>
-                {{quant}}
-                <v-btn fab dark class="add-remove-btn" color="teal">
-                    <v-icon dark>add</v-icon>
-                </v-btn> -->
-                <img class="product-image-modal" :src="product.photo">
-            </div>
-            <v-textarea
-                outline
-                auto-grow
-                label="Observações"
-                v-model="product.obs"
-                rows="1"
-                row-height="10"
-                ></v-textarea>
-        </v-container>
-      </v-card-text>
-      <v-checkbox
-        class="stuffed"
-        v-model="stuffed"
-        :label="`Borda Recheada + R$${config.borda_price_str}`"
-        color="success"
-        hide-details
-      ></v-checkbox>
-      <label class="price">Preço da Pizza: R$ {{sumPrice | priceBR}}<label v-if="stuffed"> + R${{config.borda_price_str}}</label></label>
+      <v-card-title class="card-title" v-for="(product, index) in product.pizzas" :key=index>
+        <label class="product-name">Meia {{product.name}}</label>
+      </v-card-title>
+      <label class="price">Preço da Pizza: R$ {{product.price | priceBR}}</label>
+      <label class="price" v-if="product.edge && product.edge.id"> Borda: {{product.edge.recheio}} + R${{product.edge.price | priceBR}}</label>
+      <label class="price" v-if="product.quant > 1"> Quantidade: x {{product.quant}}</label>
+      <label class="price" v-if="product.quant > 1 || (product.edge && product.edge.id)"> Preço total: R$ {{sum_price | priceBR }}</label>
+      <div class="obs-div">
+        <v-textarea
+          class="obs"
+          outline
+          label="Observações"
+          v-model="product.obs"
+          ></v-textarea>
+      </div>
       <div class="flex-btns">
         <v-btn class="blue--text darken-1" flat @click="close()">Cancel</v-btn>
         <v-btn
@@ -52,7 +31,7 @@
 
 <script>
 export default {
-  props: ["products", "sumPrice"],
+  props: ["product"],
   data() {
     console.log("data");
     return {
@@ -74,49 +53,48 @@ export default {
       let _config = this.$store.getters.config;
       return this.$store.getters.config;
     },
+    sum_price: function () {
+      let _price = 0
+      if (this.product.edge && this.product.edge.id) {
+        _price = (this.product.price + this.product.edge.price) * this.product.quant
+      } else {
+        _price = this.product.price * this.product.quant
+      }
+      return _price
+    }
   },
   methods: {
     open() {
       this.visible = true;
-      console.log("Open");
     },
     close() {
       this.visible = false;
       this.quant = 1
-      this.products[0].obs = ''
-      this.products[1].obs = ''
-      console.log("Close");
+      this.product.obs = ''
     },
     add() {
-      let _price = 0
-      if (this.stuffed) {
-        _price = this.sumPrice + this.config.borda_price
-      } else {
-        _price = this.sumPrice
-      }
       this.$store.commit("ADD_TO_ORDER", {
         half: true,
-        price: _price,
-        stuffed: this.stuffed,
+        price: this.sum_price,
+        edge: this.product.edge,
+        obs: this.product.obs,
+        quant: this.product.quant,
         0: {
-          name: this.products[0].name,
-          price: this.products[0].price,
-          photo: this.products[0].photo,
-          description: this.products[0].description,
-          obs: this.products[0].obs
+          name: this.product.pizzas[0].name,
+          price: this.product.pizzas[0].price,
+          photo: this.product.pizzas[0].photo,
+          description: this.product.pizzas[0].description
         },
         1: {
-          name: this.products[1].name,
-          price: this.products[1].price,
-          photo: this.products[1].photo,
-          description: this.products[1].description,
-          obs: this.products[1].obs
+          name: this.product.pizzas[1].name,
+          price: this.product.pizzas[1].price,
+          photo: this.product.pizzas[1].photo,
+          description: this.product.pizzas[1].description
         }
       });
       this.$cookies.set("pedido", JSON.stringify(this.pedido));
       this.quant = 1
-      this.products[0].obs = ''
-      this.products[1].obs = ''
+      this.product.obs = ''
       this.visible = false;
     },
   },
@@ -140,7 +118,6 @@ export default {
   display: flex;
   flex-direction: column;
   margin-right: 10px;
-  width: 265px;
 }
 
 .product-image-modal {
@@ -159,6 +136,7 @@ export default {
 .card-title {
     justify-content: center;
     font-size: 15px;
+    padding: 0;
 }
 
 .product-price {
@@ -190,5 +168,10 @@ export default {
   justify-content: center;
   text-align: center;
   color: green;
+  margin-top: 10px;
+}
+
+.obs {
+  width: 100%;
 }
 </style>

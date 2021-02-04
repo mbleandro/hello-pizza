@@ -1,14 +1,26 @@
 <template>
-  <v-toolbar class="flex" color="blue" dark fixed app >
+  <v-toolbar class="flex-toolbar" color="blue" dark fixed app >
     <!-- <v-toolbar-side-icon @click.stop="state.drawer = !state.drawer"></v-toolbar-side-icon> -->
     <v-toolbar-title class="title">
       <!-- <v-btn flat dark ripple :to="{name: 'index'}" >Hello Pizza</v-btn> -->
     </v-toolbar-title>
-    <v-btn flat dark ripple  href="/admin"><v-icon>admin_panel_settings</v-icon></v-btn>
+    <v-btn flat dark ripple absolute left v-if="!window_width" href="/admin"><v-icon>admin_panel_settings</v-icon></v-btn>
     <v-spacer></v-spacer>
     <router-link :to="{name: 'index'}"><img class="logo" src="../assets/images/hellopizza.png" alt="Hello Pizza"></router-link>
     <v-spacer></v-spacer>
-    <v-btn flat dark ripple  @click="open_cart_modal($event)"><v-icon>shopping_cart</v-icon></v-btn>
+    <v-btn flat dark ripple absolute right v-if="!window_width" @click="open_cart_modal($event)"><v-icon>shopping_cart</v-icon></v-btn>
+    <v-icon @click="open_cart_modal($event)" class="mobile" v-if="window_width">shopping_cart</v-icon>
+    <!-- <v-btn 
+      dark 
+      ripple
+      fab
+      flat
+      class="mobile"
+      color="black"
+      v-if="window_width" 
+      @click="open_cart_modal($event)">
+        <v-icon>shopping_cart</v-icon>
+    </v-btn> -->
     <!-- <v-btn v-if="!logged_user" class="admin-btn" flat href="../admin"><v-icon>admin_panel_settings</v-icon></v-btn> -->
     <!-- <v-menu v-if="logged_user" offset-y>
       <v-btn icon slot="activator" class="ma-0 ml-5">
@@ -62,12 +74,13 @@
       loginDialog,
       cartModal
     },
-    computed: Object.assign(
-      {},
-      Vuex.mapGetters([
-        'logged_user'
-      ])
-    ),
+    data () {
+      return {
+        window_width: false
+      }
+    },
+    computed: {
+    },
     props: ['state'],
     methods: {
       open_cart_modal (evt) {
@@ -80,6 +93,23 @@
           Snacks.show(this.$store, {text: 'Até logo!'})
         });
       },
+      clear_carrinho () {
+        this.$store.commit('CLEAR_PEDIDO')
+      },
+      // window_width: function () {
+      //   if (window.innerWidth <= 400) {
+      //     return true
+      //   } else {
+      //     return false
+      //   }
+      // },
+    },
+    mounted () {
+      if (window.innerWidth <= 470) {
+        this.window_width = true
+      } else {
+        this.window_width = false
+      }
     }
   }
 </script>
@@ -90,10 +120,11 @@
     margin: 0;
   }
 
-  .flex {
+  .flex-toolbar {
     display: flex;
     flex-grow: 1;
     justify-content: space-around;
+    align-items: center;
   }
 
   .title {
@@ -108,4 +139,10 @@
     justify-self: center;
     height: 50px;
   }
+
+  .mobile {
+    position: absolute;
+    right: 15px;
+  }
+
 </style>

@@ -36,7 +36,11 @@ def logout(request):
 
 def list_products(request):
     products = products_svc.list_products()
-    return JsonResponse({"data": products})
+    edges = products_svc.list_edges()
+    return JsonResponse({
+        "pizzas": products,
+        "edges": edges
+    })
 
 
 def whoami(request):

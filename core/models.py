@@ -25,18 +25,25 @@ class Product(models.Model):
     description = models.CharField(max_length=200)
     price = models.DecimalField(max_digits=6, decimal_places=2)
 
+    def __str__(self):
+        return self.name 
+
+    class Meta:
+        verbose_name = "Pizza"
+
 class Config(SingletonModel):
     site_name = models.CharField(max_length=255, default='Hello Pizza')
     frete = models.DecimalField(max_digits=5, decimal_places=2, default=5.00)
     borda_price = models.DecimalField(max_digits=5, decimal_places=2, default=2.00)
     year = models.IntegerField(default=2021)
+    phone = models.CharField(max_length=13, default='5512981246322')
     maintenance_mode = models.BooleanField(default=False)
 
     def __str__(self):
-        return "Configuration"
+        return "Configurações"
 
     class Meta:
-        verbose_name = "Configuration"
+        verbose_name = "Configuraçõe"
 
     def _to_dict(self):
         return {
@@ -44,5 +51,16 @@ class Config(SingletonModel):
             'frete': self.frete,
             'borda_price': self.borda_price,
             'year': self.year,
+            'phone': self.phone,
             'maintenance_mode': self.maintenance_mode
         }
+
+class Edge(models.Model):
+    recheio = models.CharField(max_length=32)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+
+    def __str__(self):
+        return self.recheio
+    
+    class Meta:
+        verbose_name = "Borda"

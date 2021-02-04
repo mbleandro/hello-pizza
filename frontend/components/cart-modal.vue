@@ -32,14 +32,12 @@
             </v-list-tile-avatar>
             <v-list-tile-content v-if="!item.half">
               <v-list-tile-title>{{item.name}}</v-list-tile-title>
-              <v-list-tile-sub-title>{{item.obs}}</v-list-tile-sub-title>
-              <label>R$ {{item.price | priceBR}}<label v-if="item.stuffed"> (Borda Recheada)</label></label>
+              <label>R$ {{item.price | priceBR}}<label v-if="item.quant > 1"><strong> (x{{item.quant}})</strong></label></label>
             </v-list-tile-content>
             <v-list-tile-content v-if="item.half">
-              <v-list-tile-title style="font-size: 15px;">1:{{item[0].name}} / 2:{{item[1].name}}</v-list-tile-title>
-              <v-list-tile-sub-title v-if="item[0].obs">1: {{item[0].obs}}</v-list-tile-sub-title>
-              <v-list-tile-sub-title v-if="item[1].obs">2: {{item[1].obs}}</v-list-tile-sub-title>
-              <label>R$ {{item.price | priceBR}}<label v-if="item.stuffed"> (Borda Recheada)</label></label>
+              <v-list-tile-title style="font-size: 15px;">1: {{item[0].name}}</v-list-tile-title>
+              <v-list-tile-title style="font-size: 15px;">2: {{item[1].name}}</v-list-tile-title>
+              <label>R$ {{item.price | priceBR}}<label v-if="item.quant > 1"><strong> (x{{item.quant}})</strong></label></label>
             </v-list-tile-content>
             <v-btn
               color="error"
@@ -51,9 +49,9 @@
           </v-list-tile>
         </template>
       </v-list>
+      <label class="price">Preço do Pedido: R$ {{total_price}}</label>
       <div class="modal-footer">
         <v-btn class="blue--text darken-1 cancel-button" flat @click="close()">Cancel</v-btn>
-        <label class="price">R$ {{total_price}}</label>
         <v-btn style="justify-content: flex-end" color="success" :to="{name: 'finish-order'}" @click="close()">FINALIZAR COMPRA</v-btn>
       </div>
     </v-card>
@@ -83,9 +81,9 @@
         }
     },
     mounted() {
-      if (this.pedido.length == 0) {
-        this.$store.commit("SET_PEDIDO", JSON.parse(this.$cookies.get('pedido')))
-      }
+      // if (this.pedido.length == 0) {
+      //   this.$store.commit("SET_PEDIDO", JSON.parse(this.$cookies.get('pedido')))
+      // }
     },
     computed: {
       pedido: function() {

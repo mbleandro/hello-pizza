@@ -36,6 +36,9 @@ const store = () => new Vuex.Store({
       });
       state.total_price = total
     },
+    CREATE_PEDIDO(state) {
+      state.pedido = []
+    },
     CLEAR_PEDIDO(state) {
       state.pedido = []
       state.total_price = 0

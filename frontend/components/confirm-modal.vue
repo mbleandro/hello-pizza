@@ -1,6 +1,6 @@
 <template>
   <v-dialog v-model="visible" max-width="500px" persistent>
-    <v-card>
+    <!-- <v-card>
       <v-card-title class="card-title">Deseja adicionar o produto ao pedido?</v-card-title>
       <v-card-text>
         <v-container class="flex" v-if="product" fluid>
@@ -17,14 +17,6 @@
                     ></v-checkbox>
                   </p>
                 </div>
-                <!-- <v-btn fab dark class="add-remove-btn" color="error">
-                    <v-icon dark>remove</v-icon>
-                </v-btn>
-                {{quant}}
-                <v-btn fab dark class="add-remove-btn" color="teal">
-                    <v-icon dark>add</v-icon>
-                </v-btn> -->
-                
                 <img class="product-image-modal" :src="product.photo">
             </div>
             <div style="flex-grow: 1;">
@@ -45,7 +37,35 @@
             :disabled="loading"
             >Adicionar ao Carrinho</v-btn>
       </div>
-    </v-card>
+    </v-card> -->
+    <v-card v-if="product">
+        <v-card-title class="flex">
+          <div class="card-title">
+            <span class="product-name">{{product.name}}</span><br>
+          </div>
+          <label class="price">Preço da Pizza: R$ {{product.price | priceBR}}</label>
+          <label class="price" v-if="product.edge && product.edge.id"> Borda: {{product.edge.recheio}} + R${{product.edge.price | priceBR}}</label>
+          <label class="price" v-if="product.quant > 1"> Quantidade: x {{product.quant}}</label>
+          <label class="price" v-if="product.quant > 1 || (product.edge && product.edge.id)"> Preço total: R$ {{sum_price | priceBR }}</label>
+          <div class="obs-div">
+            <v-textarea
+              class="obs"
+              outline
+              label="Observações"
+              v-model="product.obs"
+              ></v-textarea>
+          </div>
+        </v-card-title>
+        <div class="flex-btns">
+          <v-btn class="blue--text darken-1" flat @click="close()">Cancel</v-btn>
+          <v-btn
+              color="success"
+              @click="add()"
+              :loading="loading"
+              :disabled="loading"
+              >Adicionar ao Carrinho</v-btn>
+        </div>
+      </v-card>
   </v-dialog>
 </template>
 
@@ -72,35 +92,35 @@ export default {
     config: function () {
       let _config = this.$store.getters.config;
       return this.$store.getters.config;
+    },
+    sum_price: function () {
+      let _price = 0
+      if (this.product.edge && this.product.edge.id) {
+        _price = (this.product.price + this.product.edge.price) * this.product.quant
+      } else {
+        _price = this.product.price * this.product.quant
+      }
+      return _price
     }
   },
   methods: {
     open() {
       this.visible = true;
-      console.log("Open");
     },
     close() {
       this.visible = false;
-      this.quant = 1
       this.product.obs = ''
-      this.stuffed = false
-      console.log("Close");
     },
     add() {
-      let _price = 0
-      if (this.stuffed) {
-        _price = this.product.price + this.config.borda_price
-      } else {
-        _price = this.product.price
-      }
       this.$store.commit("ADD_TO_ORDER", {
         half: false,
         name: this.product.name,
-        price: _price,
+        price: this.sum_price,
         photo: this.product.photo,
         description: this.product.description,
         obs: this.product.obs,
-        stuffed: this.stuffed
+        edge: this.product.edge,
+        quant: this.product.quant
       });
       this.$cookies.set("pedido", JSON.stringify(this.pedido));
       this.quant = 1
@@ -118,6 +138,8 @@ export default {
     display: flex;
     padding: 0;
     flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .flex-btns {
@@ -144,7 +166,11 @@ export default {
 }
 
 .card-title {
-    justify-content: center;
+    display: flex;
+    width: 100%;
+    margin-top: 10px;
+    flex-direction: column;
+    align-items: center;
     font-size: 15px;
 }
 
@@ -165,6 +191,16 @@ export default {
 .product-info {
   display: flex;
   flex-direction: row;
+}
+
+.obs {
+  width: 100%;
+}
+
+.obs-div {
+  width: 95%;
+  flex-grow: 1;
+  margin: 10px;
 }
 
 </style>

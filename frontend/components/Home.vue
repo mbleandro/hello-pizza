@@ -1,5 +1,5 @@
 <template>
-  <carte :items="items"></carte>
+  <carte :items="items" :bordas="bordas"></carte>
 </template>
 
 <script>
@@ -7,7 +7,7 @@
 import carte from '~/components/Carte.vue'
 
 export default {
-    props: ['items'],
+    props: ['items', 'bordas'],
     components: {
         carte
     },

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from core.models import ActivityLog, Product, Config
+from core.models import ActivityLog, Product, Config, Edge
 
 
 class ActivityLogAdmin(admin.ModelAdmin):
@@ -9,5 +9,6 @@ class ActivityLogAdmin(admin.ModelAdmin):
 
 admin.site.register(ActivityLog, ActivityLogAdmin)
 admin.site.register(Product)
+admin.site.register(Edge)
 admin.site.register(Config)
 

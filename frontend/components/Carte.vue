@@ -7,44 +7,99 @@
     >
       Selecionar meia pizza
     </v-btn>
-    <template v-for="(item) in items">
-      <v-list-tile  class="list"
-        :key="item.name"
-        avatar
-      >
-        <img class="product-image" :src="item.photo">
-        <v-list-tile-content class="list-item">
-          <label class="item-name">{{item.name}}</label>
-          <label>{{item.description}}</label>
-          <label>R$ {{item.price | priceBR}}</label>
-        </v-list-tile-content>
-        <v-btn v-if="!half"
+    <template v-for="(item, index) in items">
+      <v-card class="card" :key="index">
+        <!-- <v-btn v-if="!half"
           color="warning"
           dark
+          fab
+          right
+          absolute
+          class="add-btn"
           @click="open_confirm_modal($event, item)"
         >
-          Adicionar ao carrinho
-        </v-btn>
-        <v-checkbox v-if="half" class="check-half"
-          color="orange darken-3"
-          @change="select_half(item)"
-          v-model="item.half"
-          :disabled="half_counter >= 2 && !item.half"
-        ></v-checkbox>
-      </v-list-tile>
+          <v-icon>add_shopping_cart</v-icon>
+        </v-btn> -->
+        <div  class="list"
+          :key="index"
+        >
+          <div class="product-image">
+            <img class="image" :src="item.photo">
+          </div>
+          <v-list-tile-content class="list-item">
+            <label v-if="item.fake_price" class="fake-price">R$ {{item.fake_price | priceBR}}</label>
+            <label>R$ {{item.price | priceBR}}</label>
+          </v-list-tile-content>
+        </div>
+        <div class="item-info" >
+            <label class="item-name">{{item.name}}</label>
+            <label>{{item.description}}</label>
+            <v-checkbox v-if="half" class="check-half"
+                color="orange darken-3"
+                @change="select_half(item)"
+                v-model="item.half"
+                :disabled="half_counter >= 2 && !item.half"
+            ></v-checkbox>
+        </div>
+        <v-select 
+          v-if="!half"
+          return-object
+          class="select"
+          :items="bordas"
+          label="Borda Recheada"
+          item-text="recheio"
+          v-model="item.edge"
+          solo
+        ></v-select>
+        <!-- <select v-model="item.edge" class="select">
+          <option :value="null">
+              Sem recheio
+          </option>
+          <option v-for="(bord, index) in bordas" :value="bord" :key="index">
+              {{ bord.recheio }}
+          </option>
+        </select> -->
+        <div class="quant" v-if="!half"><v-icon @click="remove_quant(item)">remove</v-icon> <h3>{{item.quant}}</h3> <v-icon @click="add_quant(item)">add</v-icon></div>
+        <v-divider v-if="!half" class="mx-4"></v-divider>
+        <v-card-actions v-if="!half" class="card-actions">
+          <v-btn class="add-btn" color="orange darken-3" @click="open_confirm_modal($event, item)"><v-icon>add_shopping_cart</v-icon></v-btn>
+        </v-card-actions>
+        <!--<v-card-actions v-if="half" class="half-checkbox">
+           <v-checkbox v-if="half" class="check-half"
+              color="orange darken-3"
+              @change="select_half(item)"
+              v-model="item.half"
+              :disabled="half_counter >= 2 && !item.half"
+          ></v-checkbox> 
+        </v-card-actions>-->
+        
+      </v-card>
     </template>
-    <v-btn v-if="half"
-      class="half-btn"
-      style="margin-bottom: 10px;"
-      color='warning'
-      @click="open_confirm_half_modal($event)"
-    > Adicionar ao Carrinho
-    </v-btn>
-    <div class="half-error">
-      <label v-if="half && half_error">Selecione as duas metades da pizza</label>
-    </div>
+    <v-card>
+      <v-select 
+        v-if="half"
+        return-object
+        class="select"
+        :items="bordas"
+        label="Borda Recheada"
+        item-text="recheio"
+        v-model="half_pizza.edge"
+        solo
+      ></v-select>
+      <div class="quant" v-if="half"><v-icon @click="remove_quant(half_pizza)">remove</v-icon> {{half_pizza.quant}} <v-icon @click="add_quant(half_pizza)">add</v-icon></div>
+      <v-btn v-if="half"
+        class="half-btn"
+        style="margin-bottom: 10px;"
+        color='warning'
+        @click="open_confirm_half_modal($event)"
+      > Adicionar ao Carrinho
+      </v-btn>
+      <div class="half-error">
+        <label v-if="half && half_error">Selecione as duas metades da pizza</label>
+      </div>
+    </v-card>
     <confirm-modal :product="selected_product" ref="confirm_modal"/>
-    <confirm-half-modal :products="metades" :sumPrice="sumPrice" ref="confirm_half_modal"/>
+    <confirm-half-modal :product="half_pizza" :sumPrice="sumPrice" ref="confirm_half_modal"/>
   </v-list>
 </template>
 
@@ -58,7 +113,7 @@
       confirmModal,
       confirmHalfModal
     },
-    props: ['items'],
+    props: ['items', 'bordas'],
     data () {
       return {
         selected_product: null,
@@ -66,7 +121,14 @@
         half: false,
         half_counter: 0,
         half_error: false,
-        sumPrice: 0
+        sumPrice: 0,
+        half_pizza: {
+          edge: null,
+          quant: 1,
+          pizzas: [],
+          obs: '',
+          price: 0
+        }
       }
     },
     methods: {
@@ -76,7 +138,7 @@
       add_to_cart(item){
         this.$confirm(
             {
-              message: `Adicionar ${item.name} ao carrinho?`,
+              message: `Adicionar ${item} ao carrinho?`,
               button: {
                   no: 'NÃO',
                   yes: 'SIM'
@@ -87,7 +149,14 @@
                */
               callback: confirm => {
                   if (confirm) {
-                      this.$store.commit('ADD_TO_ORDER', {name: item.name, price: item.price, photo: item.photo, description: item.description})
+
+                      this.$store.commit('ADD_TO_ORDER', {
+                        name: item.name, 
+                        price: item.price, 
+                        photo: item.photo, 
+                        description: item.description, 
+                        quant: item.quant,
+                        edge: item.edge})
                       this.$cookies.set("pedido", JSON.stringify(this.pedido))
                   }
               }
@@ -97,7 +166,8 @@
       open_confirm_half_modal (evt) {
         if (this.half_counter == 2) {
           this.half_error = false
-          this.metades = this.getMetades()
+          this.half_pizza.price = this.sumPrice
+          this.half_pizza.pizzas = this.getMetades()
           this.$refs.confirm_half_modal.open();
           evt.stopPropagation();
         } else {
@@ -130,11 +200,14 @@
           }
         });
         return metades
-      }
-    },
-    mounted() {
-      if (this.pedido.length == 0) {
-        this.$store.commit("SET_PEDIDO", JSON.parse(this.$cookies.get('pedido')))
+      },
+      add_quant(item) {
+        item.quant++;
+      },
+      remove_quant(item) {
+        if (item.quant > 1) {
+          item.quant--;
+        }
       }
     },
     computed: {
@@ -144,7 +217,14 @@
       total_price: function() {
         return this.$store.getters.total_price.toFixed(2).replace('.',',')
       }
-    }
+    },
+    mounted() {
+      if (this.pedido && this.pedido.length == 0) {
+        if(this.$cookies.get('pedido')) {
+          this.$store.commit("SET_PEDIDO", JSON.parse(this.$cookies.get('pedido')))
+        }
+      }
+    },
   }
 </script>
 
@@ -153,22 +233,59 @@
 <style>
 
 .list {
-  height: 100px;
-  padding: 10px;
-  margin-bottom: 30px;
+  height: 110px;
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  flex-direction: column;
+  background-color: lightblue;
+  justify-content: center;
 }
+
+.card {
+  height: 280px;
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  padding-left: 26px;
+  padding-top: 10px;
+  font-size: 15px;
+}
+
 .product-image {
-  height: 90px;
+  height: 100%;
   margin-right: 50px;
-  border-radius: 10%;
-  border: 1px solid black;
+  display: flex;
+  align-items: center;
+}
+
+.image {
+  height: 110px;
+  max-width: 160px;
 }
 
 .list-item {
-  height: auto;
+  height: 200%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 30px;
+  color: green;
+  font-family: 'Times New Roman', Times, serif, cursive;
+  font-weight: bold;
+  margin-right: 30px;
+  /* position: absolute;
+  right: 40px; */
 }
 .item-name {
   font-weight: bold;
+  font-size: 20px;
 }
 
 .half-btn {
@@ -179,12 +296,52 @@
 
 .check-half {
   flex-direction: row-reverse;
+  position: absolute;
+  right: 10px;
+  bottom: 5px;
+  /* justify-content: center; */
 }
 
 .half-error {
   display: flex;
   color: red;
   width: 100%;
+  justify-content: center;
+}
+
+.add-btn {
+  flex-grow: 1;
+}
+
+.card-actions {
+  padding: 0;
+}
+
+.fake-price {
+  font-size: small;
+  font-weight: normal;
+  color: black;
+  text-decoration: line-through;
+}
+
+.select {
+  height: 50px;
+}
+
+.quant {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 7px;
+  margin-top: 7px;
+}
+
+.v-input__control {
+  height: 50px;
+}
+
+.half-checkbox {
+  display: flex;
+  height: 50px;
   justify-content: center;
 }
 

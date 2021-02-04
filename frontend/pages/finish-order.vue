@@ -1,42 +1,42 @@
 <template>
-  <div class="flex">
+  <div class="flex-finish">
     <div>
       <div class="list-finish">
-        <template class="flex" v-for="item in pedido">
-          <v-list-tile :key="item.title" avatar class="item-content">
+        <template class="flex-finish" v-for="item in pedido">
+          <v-list-tile :key="item.title" avatar class="item-content-finish">
             <v-list-tile-avatar>
               <img v-if="!item.half" :src="item.photo">
               <img v-if="item.half" src="../assets/images/default.img.png">
             </v-list-tile-avatar>
-            <v-list-tile-content class="item-content" v-if="!item.half">
+            <v-list-tile-content class="item-content-finish" v-if="!item.half">
               <v-list-tile-title>{{item.name}}</v-list-tile-title>
               <v-list-tile-sub-title>{{item.description}}</v-list-tile-sub-title>
+              <v-list-tile-sub-title v-if="item.edge && item.edge.id">Borda: {{item.edge.recheio}} + R$ {{item.edge.price | priceBR}}</v-list-tile-sub-title>
               <v-list-tile-sub-title>{{item.obs}}</v-list-tile-sub-title>
-              <label>R$ {{item.price | priceBR}}<label v-if="item.stuffed"> (Borda Recheada)</label></label>
+              <label>R$ {{item.price | priceBR}}<label v-if="item.quant > 1"><strong> (x{{item.quant}})</strong></label></label>
             </v-list-tile-content>
-            <v-list-tile-content class="item-content" v-if="item.half">
-              <v-list-tile-title style="font-size: 15px;">1: {{item[0].name}} / 2: {{item[1].name}}</v-list-tile-title>
+            <v-list-tile-content class="item-content-finish" v-if="item.half">
+              <marquee behavior="alternate" style="font-size: 15px;">1: {{item[0].name}} / 2: {{item[1].name}}</marquee>
               <v-list-tile-sub-title>{{item[0].description}}</v-list-tile-sub-title>
               <v-list-tile-sub-title>{{item[1].description}}</v-list-tile-sub-title>
-              <v-list-tile-sub-title v-if="item[0].obs">1: {{item[0].obs}}</v-list-tile-sub-title>
-              <v-list-tile-sub-title v-if="item[1].obs">2: {{item[1].obs}}</v-list-tile-sub-title>
-              <label>R$ {{item.price | priceBR}}<label v-if="item.stuffed"> (Borda Recheada)</label></label>
+              <v-list-tile-sub-title v-if="item.edge && item.edge.id">Borda: {{item.edge.recheio}} + R$ {{item.edge.price | priceBR}}</v-list-tile-sub-title>
+              <v-list-tile-sub-title v-if="item.obs">{{item.obs}}</v-list-tile-sub-title>
+              <label>R$ {{item.price | priceBR}}<label v-if="item.quant > 1"><strong> (x{{item.quant}})</strong></label></label>
             </v-list-tile-content>
-            <v-btn color="error" dark @click="remove(item)">
-              Remover do Carrinho
+            <v-btn fab flat color="error" dark @click="remove(item)">
+             <v-icon>delete</v-icon>
             </v-btn>
           </v-list-tile>
         </template>
       </div>
     </div>
-    <p class="total-price">Valor do Pedido: R$ {{ total_price }}</p>
+    <p class="total-price-finish">Valor do Pedido: R$ {{ total_price }}</p>
 
     <h1>Informações de Entrega</h1>
 
     <form>
       <v-text-field
         v-model="name"
-        :counter="15"
         :error-messages="errorsName"
         label="Nome"
         required
@@ -77,7 +77,7 @@
         @input="$v.number.$touch()"
         @blur="$v.number.$touch()"
       ></v-text-field>
-      <div class="flex">
+      <div class="flex-finish">
         <v-btn class="conclude-order" color="success" @click="send_order()"
           ><v-icon dark left>local_shipping</v-icon> Finalizar Compra</v-btn
         >
@@ -98,7 +98,6 @@ export default {
       district: "",
       street: "",
       number: null,
-      phone: "5512981346322",
       apilink: "",
       text: "",
     };
@@ -138,27 +137,33 @@ export default {
         this.errorsStreet.length == 0 &&
         this.errorsNumber.length == 0
       ) {
-        this.text += `Bom dia/ Boa tarde / Boa Noite \n`;
+        this.text += `Bom dia / Boa tarde / Boa Noite \n`;
         this.pedido.forEach((item) => {
           if (item.half) {
-            this.text += `*- 1: Meia ${item[0].name} / 2: Meia ${item[1].name}*`
+            this.text += ` Quantidade: *x${item.quant}*\n`;
+            this.text += `*- 1: Meia ${item[0].name} / 2: Meia ${item[1].name}* \n`
             this.text += ` --- 1: ${item[0].description} \n`;
             this.text += ` --- 2: ${item[1].description} \n`;
-            this.text += ` ---------------- R$${item.price.toFixed(2).replace(".", ",")} \n `;
-            if (item[0].obs) {
-              this.text += `1: obs: ${item[0].obs} \n \n`
+            if(item.edge && item.edge.id) {
+              this.text += ` --- Borda: ${item.edge.recheio} + R$${item.edge.price.toFixed(2).replace(".", ",")}\n`;
             }
-            if (item[1].obs) {
-              this.text += `2: obs: ${item[1].obs} \n \n`
+            this.text += ` ---------------- R$${item.price.toFixed(2).replace(".", ",")} \n `;
+            if (item.obs) {
+              this.text += `obs: ${item.obs} \n \n`
             }
           } else {
+            this.text += ` Quantidade: *x${item.quant}*\n`;
             this.text += `*- ${item.name}* \n`;
-            this.text += ` --- ${item.description} \n`;
+            this.text += ` --- ${item.description} \n`
+            if(item.edge && item.edge.id) {
+              this.text += ` --- Borda: ${item.edge.recheio} + R$${item.edge.price.toFixed(2).replace(".", ",")}\n`;
+            }
             this.text += ` ---------------- R$${item.price.toFixed(2).replace(".", ",")} \n `;
             if (item.obs) {
               this.text += `obs: ${item.obs} \n \n`
             }
           }
+          this.text += `\n`;
         })
         this.text += `---- Total: R$${this.total_price} ---- \n \n`;
         this.text += `*Entregar para ${this.$v.name.$model} no endereço:*`;
@@ -167,10 +172,11 @@ export default {
         this.apilink += this.isMobile() ? "api" : "web";
         this.apilink +=
           ".whatsapp.com/send?phone=" +
-          this.phone +
+          this.config.phone +
           "&text=" +
           encodeURI(this.text);
         window.open(this.apilink);
+        this.clear_pedido()
       } 
     },
     isMobile() {
@@ -188,6 +194,10 @@ export default {
       })(navigator.userAgent || navigator.vendor || window.opera);
       return check;
     },
+    clear_pedido() {
+      this.$store.commit('CREATE_PEDIDO')
+      this.$cookies.set("pedido", JSON.stringify(this.pedido));
+    }
   },
   computed: {
     pedido: function () {
@@ -237,7 +247,7 @@ export default {
 </script>
 
 <style >
-.flex {
+.flex-finish {
   display: flex;
   width: 100%;
   flex-direction: column;
@@ -251,13 +261,13 @@ export default {
   height: auto;
 }
 
-.total-price {
+.total-price-finish {
   align-self: flex-end;
   margin-right: 35px;
   font-weight: bold;
 }
 
-.item-content {
+.item-content-finish {
   height: 110px;
 }
 
