@@ -26,7 +26,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
 
     def __str__(self):
-        return self.name 
+        return self.name
 
     class Meta:
         verbose_name = "Pizza"
@@ -36,7 +36,7 @@ class Config(SingletonModel):
     frete = models.DecimalField(max_digits=5, decimal_places=2, default=5.00)
     borda_price = models.DecimalField(max_digits=5, decimal_places=2, default=2.00)
     year = models.IntegerField(default=2021)
-    phone = models.CharField(max_length=13, default='5512981246322')
+    phone = models.CharField(max_length=13, default='5512981346322')
     maintenance_mode = models.BooleanField(default=False)
 
     def __str__(self):
@@ -61,6 +61,6 @@ class Edge(models.Model):
 
     def __str__(self):
         return self.recheio
-    
+
     class Meta:
         verbose_name = "Borda"

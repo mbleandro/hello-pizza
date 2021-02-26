@@ -177,7 +177,7 @@ export default {
           encodeURI(this.text);
         window.open(this.apilink);
         this.clear_pedido()
-      } 
+      }
     },
     isMobile() {
       var check = false;
